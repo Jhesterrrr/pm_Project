@@ -1,0 +1,94 @@
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center; 
+    min-height: 90vh; 
+    margin: 0;
+    background-color: #ddd5c5;
+    background-image: url('Hotel.jpg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+}
+
+.LoginContainer {
+    display: flex;
+    flex-direction: column; 
+    justify-content: center;
+    align-items: center;
+    background-color: rgb(79, 91, 102, 0.5);
+    border-radius: 12px;
+    width: 300px; 
+    border: 15px solid transparent;
+    padding: 35px;
+    text-align: center;
+    transition: transform 0.2s ease-in-out
+}
+
+.LoginContainer label {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-bottom: 25px;
+    color: white;
+    }
+
+.loginbutton {
+    color: white;
+    background-color: navy;
+    width: 200px;
+    cursor: pointer;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.loginbutton:hover {
+    background-color: rgb(92, 83, 216);
+}
+
+.loginbutton:active {
+    transform: scale(0.80);
+}
+
+.material-symbols-outlined {
+    color: gray;
+  font-variation-settings:
+  'FILL' 0,
+  'wght' 400,
+  'GRAD' 0,
+  'opsz' 24
+}
+
+.input-group {
+    display: flex;
+    align-items: center; 
+    margin-bottom: 15px; 
+    padding: 12px 15px;
+    background-color: white;
+    box-sizing: border-box;
+    border: 2px solid transparent;
+    border-radius: 15px;
+}
+
+input {
+    border: none;
+    outline: none;
+    background: none;
+    font-size: 1rem;
+    color: var(--primary-color);
+    width: 100%;
+}   
+
+.pos-container {
+    margin: 8px 0 16px;
+    padding: 10px 12px;
+    width: 100%;
+    box-sizing: border-box;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.85);
+    color: #2c3e50;
+    text-align: left;
+    font-weight: 600;
+}
