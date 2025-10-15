@@ -9,72 +9,16 @@ include 'db_connection.php';
     <meta charset="UTF-8">
     <title>User Accounts</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="CSS_files/Admin_Dash.css">
+    <link rel="stylesheet" href="CSS_files/theme.css">
     <style>
-    .dashboard-layout { display:flex; min-height:100vh; background:#f9fafb; }
-        .sidebar { width:235px; background:#1e293b; padding:26px 0 16px 0; color:#fff; display:flex; flex-direction:column; }
-        .sidebar-brand { display:flex; align-items:center; gap:12px; font-size:21px; font-weight:700; margin-bottom:28px; padding:0 23px; }
-        .brand-icon { font-size:26px; }
-        .sidebar-nav { display:flex; flex-direction:column; gap:6px; }
-        .nav-item { background:none; border:none; color:#dbeafe; text-align:left; font-size:16px; padding:12px 23px; cursor:pointer; border-radius:7px; transition:background .14s,color .13s; display:flex; align-items:center; gap:9px;}
-        .nav-item:hover, .nav-item.active { background:#2563eb; color:#fff; }
-        .nav-group { margin-bottom:5px; }
-        .nav-item.has-children { justify-content:space-between; }
-        .nav-caret { font-size:13px; margin-left:auto; }
-        .nav-children { display:none; flex-direction:column; gap:2px; padding-left:19px;}
-        .nav-children.open { display:flex; }
-        .nav-child { color:#dbeafe; text-decoration:none; font-size:15px; padding:6px 0; transition:color .13s; }
-        /* Remove underline hover effect for User Accounts & User Status & Permissions */
-        #group-users .nav-child:hover { color:#fff; text-decoration:none; }
-        .main { flex:1; padding:40px 0 0 0; background:#f9fafb; min-height:100vh; }
+        /* User Accounts specific styles */
         .ua-container { max-width: 1100px; margin: 20px auto; padding: 0 16px; }
-        .ua-title { font-size: 22px; font-weight: 700; color:#0f172a; }
-        .ua-back { display:inline-flex; align-items:center; gap:6px; padding:8px 12px; border:1px solid #2563eb; color:#2563eb; border-radius:8px; text-decoration:none; }
-        .ua-back:hover { background:#2563eb; color:#fff; }
+        .ua-header { display:flex; align-items:center; justify-content:space-between; }
+        .ua-title { font-size: 22px; font-weight: 700; color:var(--text-primary); }
+        .ua-back { display:inline-flex; align-items:center; gap:6px; padding:8px 12px; border:1px solid var(--border-focus); color:var(--border-focus); border-radius:8px; text-decoration:none; transition: all var(--transition-normal); }
+        .ua-back:hover { background:var(--border-focus); color:white; transform: translateY(-1px); }
         .two-col { display:flex; flex-wrap:wrap; gap:22px; margin-top:18px; }
         .col { flex:1; min-width:320px; }
-    </style>
-    <style>
-    .ua-container { max-width: 1100px; margin: 20px auto; padding: 0 16px; }
-    .ua-header { display:flex; align-items:center; justify-content:space-between; }
-    .ua-title { font-size: 22px; font-weight: 700; color:#0f172a; }
-    .ua-menu .action-card { 
-        display:block; width:100%; text-align:left; cursor:pointer;
-        background:#1f2937; border:0; border-radius:12px; padding:16px 18px;
-        box-shadow:0 8px 24px rgba(0,0,0,0.06);
-        transition: transform 160ms ease, box-shadow 160ms ease, background-color 160ms ease, color 160ms ease, font-size 160ms ease;
-        font-weight:600; color:#e5e7eb;
-    }
-    .ua-menu .action-card:hover {
-        transform: translateY(-2px) scale(1.03);
-        box-shadow: 0 10px 28px rgba(0,0,0,0.10);
-        background:#ffffff; color:#111827; font-weight:700; font-size:1.06em;
-    }
-    .ua-section { display:none; }
-    .ua-actions { display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap:14px; margin-top:14px; }
-    @media (max-width: 900px) { .ua-actions { grid-template-columns: 1fr; } }
-    .ua-back { display:inline-flex; align-items:center; gap:6px; padding:8px 12px; border:1px solid #2563eb; color:#2563eb; border-radius:8px; text-decoration:none; }
-    .ua-back:hover { background:#2563eb; color:#fff; }
-
-    /* Status table */
-    .ua-status-note { font-size:13px; color:#6b7280; margin:8px 0 12px; }
-    .status-table { width:100%; border-collapse:separate; border-spacing:0; font-size:14px; }
-    .status-table thead th { text-align:left; color:#6b7280; font-weight:600; padding:10px 12px; border-bottom:1px solid #e5e7eb; }
-    .status-table tbody td { padding:10px 12px; border-bottom:1px solid #f1f5f9; }
-    .status-table tbody tr:nth-child(odd) { background:#fcfdff; }
-    .status-badge { display:inline-block; padding:4px 8px; border-radius:999px; font-weight:600; font-size:12px; }
-    .status-badge.active { background:#dcfce7; color:#166534; }         /* Green */
-    .status-badge.onleave { background:#fef9c3; color:#854d0e; }       /* Yellow */
-    .status-badge.terminated { background:#fee2e2; color:#991b1b; }    /* Red */
-    .status-actions { display:flex; gap:8px; }
-    .status-btn { padding:6px 10px; border:none; border-radius:8px; cursor:pointer; font-weight:600; color:#fff; transition:transform 120ms ease, box-shadow 160ms ease, background 160ms ease; }
-    .status-btn:hover { transform: translateY(-1px); box-shadow:0 6px 18px rgba(0,0,0,0.10); }
-    .btn-active { background:#16a34a; }
-    .btn-onleave { background:#ca8a04; }
-    .btn-terminated { background:#dc2626; }
-    .btn-active:hover { background:#15803d; }
-    .btn-onleave:hover { background:#a16207; }
-    .btn-terminated:hover { background:#b91c1c; }
     </style>
 </head>
 
@@ -701,16 +645,16 @@ if ((changes.Department && changes.Department === 'Blocked') ||
 
     try {
       const res = await fetch('updateAcc.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ Employee_ID: curr.Employee_ID, changes })
-      });
+        met    </script>
 
-      let json = null;
-      try { json = await res.json(); } catch {}
+    <script src="JS_files/theme.js"></script>
 
-      if (!res.ok || !json || !json.ok) {
-        const errMsg = (json && json.error) ? json.error : 'Update failed.';
+    <div style="max-width:400px; margin:24px auto;">
+        <a href="Admin_Dash.php" 
+           style="display:block; text-align:center; margin-top:20px; padding:10px; background:#2980b9; color:#fff; border:none; border-radius:6px; font-size:16px; text-decoration:none;">
+            Go to Dashboard
+        </a>
+    </div>'Update failed.';
         alert('Error: ' + errMsg);
         return;
       }

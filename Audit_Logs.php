@@ -39,104 +39,59 @@ if ($stmt) {
     $stmt->bind_param($types, ...$binds);
     $stmt->execute();
     $res = $stmt->get_result();
-    if ($res) { while ($r = $res->fetch_assoc()) { $logs[] = $r; } }
-    $stmt->close();
-}
-?>
-<!DOCTYPE html>
-<html lang="en">
+    if ($res) { while ($r = $res->fetch_assoc()) { $logs[] = $r; } }<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Audit Logs</title>
-    <link rel="stylesheet" href="CSS_files/Admin_Dash.css">
+    <link rel="stylesheet" href="CSS_files/theme.css">
     <style>
-        .dashboard-layout { display:flex; min-height:100vh; background:#f9fafb; }
-        .sidebar { width:235px; background:#1e293b; padding:26px 0 16px 0; color:#fff; display:flex; flex-direction:column; }
-        .sidebar-brand { display:flex; align-items:center; gap:12px; font-size:21px; font-weight:700; margin-bottom:28px; padding:0 23px; }
-        .brand-icon { font-size:26px; }
-        .sidebar-nav { display:flex; flex-direction:column; gap:6px; }
-        .nav-item { background:none; border:none; color:#dbeafe; text-align:left; font-size:16px; padding:12px 23px; cursor:pointer; border-radius:7px; transition:background .14s,color .13s; display:flex; align-items:center; gap:9px; text-decoration:none;}
-        .nav-item:hover, .nav-item.active { background:#2563eb; color:#fff; text-decoration:none; }
-        .nav-group { margin-bottom:5px; }
-        .nav-item.has-children { justify-content:space-between; }
-        .nav-caret { font-size:13px; margin-left:auto; }
-        .nav-children { display:none; flex-direction:column; gap:2px; padding-left:19px;}
-        .nav-children.open { display:flex; }
-        .nav-child { color:#dbeafe; text-decoration:none; font-size:15px; padding:6px 0; transition:color .13s; }
-        /* Remove underline for nav-child and its hover */
-        #group-users .nav-child,
-        #group-users .nav-child:hover,
-        .nav-child,
-        .nav-child:hover {
-            text-decoration: none !important;
+        /* Audit Logs specific styles */
+        .filter-bar { 
+            background: var(--bg-tertiary); 
+            border: 1px solid var(--border-primary); 
+            border-radius: var(--radius-lg); 
+            padding: var(--spacing-lg); 
+            margin-bottom: var(--spacing-lg); 
+            display: flex; 
+            gap: var(--spacing-lg); 
+            align-items: end; 
+            flex-wrap: wrap; 
         }
-        .main { flex:1; padding:40px 0 0 0; background:#f9fafb; min-height:100vh; }
-        .ua-container { max-width: 1100px; margin: 20px auto; padding: 0 16px; }
-        .ua-title { font-size: 22px; font-weight: 700; color:#0f172a; }
-        .ua-back { display:inline-flex; align-items:center; gap:6px; padding:8px 12px; border:1px solid #2563eb; color:#2563eb; border-radius:8px; text-decoration:none; }
-        .ua-back:hover { background:#2563eb; color:#fff; text-decoration:none; }
-        .two-col { display:flex; flex-wrap:wrap; gap:22px; margin-top:18px; }
-        .col { flex:1; min-width:320px; }
-        .filter-bar { background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:12px; margin-bottom:12px; display:flex; gap:10px; align-items:end; flex-wrap:wrap; }
-        .filter-group { display:flex; flex-direction:column; gap:6px; }
-        .filter-group label { font-size:13px; color:#475569; }
-        .filter-input { padding:8px 10px; border:1px solid #cbd5e1; border-radius:8px; font-size:14px; }
-        .btn {
-            padding:8px 12px;
-            border:none;
-            border-radius:8px;
-            cursor:pointer;
-            font-weight:600;
-            text-decoration: none !important;
-            background:#fff;
-            color:#2563eb;
-            transition: background 0.2s, color 0.2s, box-shadow 0.2s, transform 0.15s;
-            box-shadow: 0 1px 3px rgba(30,41,59,0.08);
+        .filter-group { 
+            display: flex; 
+            flex-direction: column; 
+            gap: var(--spacing-sm); 
+            min-width: 150px;
         }
-        /* Button Colors */
-        .btn-primary {
-            background:#2563eb;
-            color:#fff;
-            border: none;
+        .filter-group label { 
+            font-size: 13px; 
+            font-weight: 600;
+            color: var(--text-secondary); 
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
-        .btn-primary:hover, .btn-primary:focus {
-            background:#1d4ed8;
-            color:#fff;
-            transform: translateY(-2px) scale(1.03);
-            box-shadow: 0 6px 16px rgba(37,99,235,0.18);
+        .filter-input { 
+            padding: var(--spacing-md); 
+            border: 1px solid var(--border-secondary);
+            border-radius: var(--radius-md);
+            font-size: 14px;
+            background: var(--bg-input);
+            color: var(--text-primary);
+            transition: all var(--transition-normal);
         }
-        /* Make btn-muted and btn (including Clear/Show More) white w/ color text */
-        .btn-muted {
-            background:#fff !important;
-            color:#2563eb !important;
-            border:1px solid #cbd5e1;
-        }
-        .btn-muted:hover, .btn-muted:focus {
-            background: #f1f5f9 !important;
-            color: #1d4ed8 !important;
-            border-color: #2563eb;
-            transform: translateY(-2px) scale(1.03);
-            box-shadow: 0 4px 10px rgba(37,99,235,0.13);
-        }
-        /* Generic for all .btn: elevate and colorize on hover/focus */
-        .btn:hover, .btn:focus {
+        .filter-input:focus {
             outline: none;
-            text-decoration: none !important;
-            box-shadow: 0 4px 18px rgba(37,99,235,0.14);
-            transform: translateY(-1px) scale(1.01);
+            border-color: var(--border-focus);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
         }
-        /* Remove underline from all a.btn in all states */
-        a.btn, a.btn:visited, a.btn:hover, a.btn:active, a.btn:focus {
-            text-decoration: none !important;
-            color: inherit;
-        }
-        /* Stacked filter actions horizontally */
         .filter-actions {
             display: flex;
             flex-direction: row;
-            gap: 8px;
+            gap: var(--spacing-md);
             align-items: flex-end;
+        }
+    </style> align-items: flex-end;
         }
     </style>
 </head>
@@ -252,13 +207,7 @@ if ($stmt) {
                             'limit' => $moreLimit
                         ]));
                     ?>
-                    <a class="btn btn-muted" href="Audit_Logs.php<?php echo $qs ? ('?' . $qs) : ''; ?>">Show more</a>
-                </div>
-            </section>
-            </div>
-        </main>
-    </div>
-
+                    <a class="btn btn-muted" href="Aud    <script src="JS_files/theme.js"></script>
     <script>
     (function() {
         var toggles = document.querySelectorAll('.nav-item.has-children');
@@ -270,6 +219,11 @@ if ($stmt) {
                 var isOpen = group.classList.contains('open');
                 group.classList.toggle('open', !isOpen);
                 var caret = this.querySelector('.nav-caret');
+                if (caret) caret.textContent = !isOpen ? '▴' : '▾';
+            });
+        }
+    })();
+    </script>           var caret = this.querySelector('.nav-caret');
                 if (caret) caret.textContent = !isOpen ? '▴' : '▾';
             });
         }

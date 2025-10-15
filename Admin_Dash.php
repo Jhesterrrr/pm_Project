@@ -8,9 +8,6 @@ $Department = isset($_SESSION['Department']) ? $_SESSION['Department'] : 'Admin'
 $Position = isset($_SESSION['Position']) ? $_SESSION['Position'] : 'Admin';
 require_once __DIR__ . '/db_connection.php';
 
-// (Removed dark mode handling)
-
-
 // Resolve current user's profile from accounts table
 $currentEmployeeId = (int)$_SESSION['Employee_ID'];
 $currentUserName = isset($_SESSION['Account_Owner']) ? $_SESSION['Account_Owner'] : '';
@@ -68,200 +65,96 @@ if ($alog) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hotel Dashboard</title>
+    <link rel="stylesheet" href="CSS_files/theme.css">
     <style>
-        :root {
-            --main-bg:#f6f7fb;
-            --main-text:#243246;
-            --sidebar-bg:#e7eaf3;
-            --sidebar-brand-color:#192145;
-            --nav-item-color:#2266aa;
-            --nav-item-hover-bg:#cff1ff;
-            --nav-item-hover-color:#1a2b41;
-            --panel-bg:#fff;
-            --stat-card-bg:#f6f7fb;
-            --stat-card-shadow:rgba(180,190,238,0.13);
-            --table-header-bg:#eff6fe;
-            --table-row-bg:#f6faff;
-            --table-row-alt-bg:#eaf4ff;
-            --graph-bg: linear-gradient(to bottom,#f2f6fb 0%,#d7e6fa 90%);
-            --audit-table-text-color:#244266;
-            --border-card: #bcc7df;
-            --shadow-card: 0 2px 12px rgba(170,190,230,0.11);
-        }
-        body, html { background:var(--main-bg); color:var(--main-text); font-family:'Inter',sans-serif; margin:0; padding:0; }
-        .dashboard-layout { display: flex; min-height: 100vh; background: var(--main-bg);}
-        .sidebar {
-            width: 235px;
-            background: var(--sidebar-bg);
-            padding: 26px 0 16px 0;
-            color: var(--sidebar-brand-color);
-            display: flex;
-            flex-direction: column;
-            box-shadow: 2px 0 18px #0001;
-        }
-        .sidebar-brand { display: flex; align-items: center; gap: 12px; font-size: 21px; font-weight: 700; margin-bottom: 28px; padding: 0 23px;}
-        .brand-icon { font-size: 26px;}
-        .sidebar-nav { display: flex; flex-direction: column; gap: 6px;}
-        .nav-item {
-            background: none;
-            border: none;
-            color: var(--nav-item-color);
-            text-align: left;
-            font-size: 16px;
-            padding: 12px 23px;
-            cursor: pointer;
-            border-radius: 7px;
-            transition: background .14s, color .13s;
-            display: flex;
-            align-items: center;
-            gap: 9px;
-        }
-        .nav-item:hover, .nav-item.active {
-            background: var(--nav-item-hover-bg);
-            color: var(--nav-item-hover-color);
-        }
-        .nav-group { margin-bottom: 5px;}
-        .nav-item.has-children { justify-content: space-between; }
-        .nav-caret { font-size: 13px; margin-left: auto;}
-        .nav-children { display: none; flex-direction:column; gap:2px; padding-left:19px;}
-        .nav-children.open { display: flex;}
-        .nav-child {
-            color: var(--nav-item-color);
-            text-decoration:none;
-            font-size:15px;
-            padding:7px 0;
-            border-radius:5px;
-            transition: background .15s, color .13s;
-        }
-        #group-users .nav-child:hover, #group-customers .nav-child:hover {
-            background: var(--nav-item-hover-bg);
-            color: var(--nav-item-hover-color);
-            text-decoration: none;
-        }
-        .main { flex: 1; padding: 40px 0 0 0; background: var(--main-bg); min-height: 100vh; color: var(--main-text);}
-        .ua-container { max-width: 1100px; margin: 20px auto; padding: 0 16px;}
-        .ua-title { font-size: 22px; font-weight: 700; color: var(--main-text);}
-        .main-header, .panel-header, .stat-label, .user-meta, .user-name, .page-title { color: var(--main-text);}
-        .two-col { display: flex; flex-wrap: wrap; gap: 22px; margin-top: 18px;}
-        .col { flex:1; min-width:320px;}
-        .panel {
-            background: var(--panel-bg);
-            border-radius: 13px;
-            box-shadow: var(--shadow-card);
-            margin: 21px 0 24px 0;
-            padding: 25px 28px;
-            border:1px solid var(--border-card);
-        }
-        .panel-header {
-            font-size:18px;
-            font-weight:600;
-            margin-bottom:13px;
-            color:var(--main-text);
-            letter-spacing:0.2px;
-        }
-        .cards {
-            display: flex;
-            flex-wrap:wrap;
-            gap:25px;
-            margin-bottom:24px;
-            margin-top:14px;
-        }
-        .stat-card {
-            background: var(--stat-card-bg);
-            border-radius: 12px;
-            box-shadow: var(--shadow-card);
-            flex:1;
-            min-width:190px;
-            max-width:242px;
-            padding: 27px 22px;
-            display: flex;
-            flex-direction: column;
-            gap:14px;
-            border: 1.5px solid var(--border-card);
-            transition:box-shadow .19s, background .15s;
-        }
-        .stat-top { display: flex; align-items: center; gap: 7px; }
-        .stat-icon { font-size: 29px;}
-        .stat-label { font-size:16px; font-weight:500;}
-        .stat-value { font-size:30px; font-weight:800; margin-top:13px; color: #5adba9;}
-        .stat-card:hover {
-            box-shadow: 0 4px 24px rgba(112,152,205,0.14);
-            background: #e6f3fa;
-        }
-        .user-area { display: flex; align-items: center; gap:18px;}
-        .user-info { display: flex; align-items: center; gap:10px;}
-        .avatar {
-            width:43px; height:43px; border-radius:50%; object-fit:cover; background:#cfdfff; border:2px solid #aebae5;
-        }
-        .user-texts { display: flex; flex-direction: column; gap:1.5px;}
-        .user-name { font-size:15px; font-weight:600;}
-        .user-meta { font-size:13px; color:#4e7cb7;}
-        .btn-logout {
-            color: #ff6b6b;
-            background: none;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 8px;
-            font-weight: 600;
-            margin-left: 14px;
-            font-size: 15.5px;
-            transition: background .18s, color .13s;
-            border: 1.5px solid #b1bedf;
-        }
-        .btn-logout:hover {
-            background: #ffe2e2;
-            color: #ff3838;
-            border-color: #ffb1b1;
-        }
-        /* Removed darkmode toggle refinement and darkmode styles */
+        /* Custom dashboard-specific styles */
         .graph-placeholder {
-            background: var(--graph-bg);
-            border-radius: 13px;
-            border:1.5px solid var(--border-card);
+            background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-secondary) 100%);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-primary);
+            position: relative;
+            overflow: hidden;
         }
-        /* Table custom styling for light mode */
-        .table-wrap { overflow-x:auto; border-radius:14px;}
-        .audit-table {
-            width:100%;
-            border-spacing:0;
-            background: none;
-            margin-top:10px;
-            box-shadow: 0 1px 9px #b4cae2;
+        
+        .graph-placeholder::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent 49%, var(--border-primary) 50%, transparent 51%);
+            background-size: 20px 20px;
+            opacity: 0.1;
         }
-        .audit-table th, .audit-table td {
-            padding: 13px 18px;
-            text-align: left;
-        }
-        .audit-table th {
-            background: var(--table-header-bg);
-            font-size:15px;
-            font-weight:600;
-            color: #2b7fc8;
-            border-bottom:1.5px solid #ccdfff;
-        }
-        .audit-table td {
-            color: var(--audit-table-text-color);
-            font-size:14px;
-        }
-        .audit-table tr:nth-child(even) td { background: var(--table-row-bg);}
-        .audit-table tr:nth-child(odd) td { background: var(--table-row-alt-bg);}
-        .audit-table tr:hover td { background: #e3f3ff;}
+        
         .dash-footer {
             text-align: center;
-            font-size: 15px;
-            color: #8394c7;
-            margin: 50px 0 9px;
-            letter-spacing:0.25px;
-            opacity:0.92;
+            font-size: 14px;
+            color: var(--text-muted);
+            margin: var(--spacing-2xl) 0 var(--spacing-lg);
+            letter-spacing: 0.5px;
+            opacity: 0.8;
         }
-        @media (max-width: 1050px) {
-          .cards { flex-direction: column;}
-          .stat-card { max-width:100%; }
+        
+        /* Chart.js theme integration */
+        .chart-container {
+            position: relative;
+            height: 300px;
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-lg);
+            border: 1px solid var(--border-primary);
+        }
+        
+        /* Revenue chart specific styling */
+        .revenue-chart {
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-xl);
+            border: 1px solid var(--border-primary);
+            box-shadow: var(--shadow-md);
+        }
+        
+        /* Performance overview styling */
+        .performance-overview {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--spacing-xl);
+            align-items: flex-start;
+        }
+        
+        .chart-section {
+            flex: 1;
+            min-width: 350px;
+        }
+        
+        .chart-placeholder {
+            height: 250px;
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            font-style: italic;
+            border: 2px dashed var(--border-secondary);
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .performance-overview {
+                flex-direction: column;
+            }
+            
+            .chart-section {
+                min-width: 100%;
+            }
         }
     </style>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="dashboard-layout">
@@ -271,12 +164,12 @@ if ($alog) {
                 <span class="brand-text">Hotel Admin</span>
             </div>
             <nav class="sidebar-nav">
-                <button class="nav-item active" data-section="dashboard" >
+                <button class="nav-item active" data-section="dashboard">
                     <span class="nav-icon">🏠</span>
                     <span class="nav-label">Dashboard</span>
                 </button>
                 <div class="nav-group">
-                    <button class="nav-item has-children" data-toggle="users" >
+                    <button class="nav-item has-children" data-toggle="users">
                         <span class="nav-icon">👤</span>
                         <span class="nav-label">User Management</span>
                         <span class="nav-caret">▾</span>
@@ -332,10 +225,8 @@ if ($alog) {
 
         <main class="main">
             <div class="ua-container">
-            <header class="main-header" style="display:flex;align-items:baseline;justify-content:space-between;">
-                <h1 class="page-title" style="font-weight:800;">Hotel Dashboard</h1>
-                <div style="display:flex;align-items:center;gap:17px;">
-                    <!-- Dark mode toggle removed -->
+                <header class="main-header">
+                    <h1 class="page-title">Hotel Dashboard</h1>
                     <div class="user-area">
                         <div class="user-info">
                             <img class="avatar" src="https://ui-avatars.com/api/?name=<?php echo urlencode($currentUserName ?: ($Position)); ?>&background=cfdfff&color=243246" alt="Profile">
@@ -346,209 +237,229 @@ if ($alog) {
                         </div>
                         <a class="btn-logout" href="logout.php" title="Logout">Logout</a>
                     </div>
-                </div>
-            </header>
+                </header>
 
-            <section class="cards">
-                <div class="stat-card">
-                    <div class="stat-top">
-                        <span class="stat-icon">👥</span>
-                        <span class="stat-label">Total Users</span>
+                <section class="cards">
+                    <div class="stat-card">
+                        <div class="stat-top">
+                            <span class="stat-icon">👥</span>
+                            <span class="stat-label">Total Users</span>
+                        </div>
+                        <div class="stat-value"><?php echo number_format($totalActiveUsers); ?></div>
                     </div>
-                    <div class="stat-value"><?php echo number_format($totalActiveUsers); ?></div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-top">
-                        <span class="stat-icon">⚡</span>
-                        <span class="stat-label">Active Sessions</span>
+                    <div class="stat-card">
+                        <div class="stat-top">
+                            <span class="stat-icon">⚡</span>
+                            <span class="stat-label">Active Sessions</span>
+                        </div>
+                        <div class="stat-value">1</div>
                     </div>
-                    <div class="stat-value">1</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-top">
-                        <span class="stat-icon">💵</span>
-                        <span class="stat-label">Daily Revenue</span>
+                    <div class="stat-card">
+                        <div class="stat-top">
+                            <span class="stat-icon">💵</span>
+                            <span class="stat-label">Daily Revenue</span>
+                        </div>
+                        <div class="stat-value"><?php echo '₱' . number_format($averageDailyRevenue); ?></div>
                     </div>
-                    <div class="stat-value"><?php echo '₱' . number_format($averageDailyRevenue); ?></div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-top">
-                        <span class="stat-icon">🛎️</span>
-                        <span class="stat-label">Rooms Occupied</span>
+                    <div class="stat-card">
+                        <div class="stat-top">
+                            <span class="stat-icon">🛎️</span>
+                            <span class="stat-label">Rooms Occupied</span>
+                        </div>
+                        <div class="stat-value" id="stat-rooms-occupied" style="transition:all .3s">0</div>
                     </div>
-                    <div class="stat-value" id="stat-rooms-occupied" style="transition:all .3s">0</div>
-                </div>
-            </section>
+                </section>
 
-            <script>
-            if (typeof roomsData === "undefined") {
-                var roomsData = [
-                    { Status: "Available" },
-                    { Status: "Occupied" }, { Status: "Occupied" },
-                    { Status: "Overtime" }, { Status: "Occupied" },
-                    { Status: "Available" }, { Status: "Overtime" }
-                ];
-            }
-            function updateRoomsOccupiedCard() {
-                var rooms = (typeof roomsData !== "undefined" ? roomsData : []);
-                var count = 0;
-                for (var i = 0; i < rooms.length; ++i) {
-                    var s = String(rooms[i].Status).trim().toLowerCase();
-                    if (s === "occupied" || s === "overtime")
-                        count++;
+                <script>
+                if (typeof roomsData === "undefined") {
+                    var roomsData = [
+                        { Status: "Available" },
+                        { Status: "Occupied" }, { Status: "Occupied" },
+                        { Status: "Overtime" }, { Status: "Occupied" },
+                        { Status: "Available" }, { Status: "Overtime" }
+                    ];
                 }
-                var el = document.getElementById("stat-rooms-occupied");
-                if (el) {
-                    el.textContent = count;
+                function updateRoomsOccupiedCard() {
+                    var rooms = (typeof roomsData !== "undefined" ? roomsData : []);
+                    var count = 0;
+                    for (var i = 0; i < rooms.length; ++i) {
+                        var s = String(rooms[i].Status).trim().toLowerCase();
+                        if (s === "occupied" || s === "overtime")
+                            count++;
+                    }
+                    var el = document.getElementById("stat-rooms-occupied");
+                    if (el) {
+                        el.textContent = count;
+                    }
                 }
-            }
-            updateRoomsOccupiedCard();
-            </script>
-           
-            <section class="panel">
-                <div class="panel-header">
-                    Performance Overview 
-                    <span style="font-weight:400;font-size:13px;color:#7cdbaa;">(Current Week: Monday - Sunday)</span>
-                </div>
-                <div style="display:flex;flex-wrap:wrap;gap:32px;">
-                    <div class="graph-placeholder" style="flex:1;min-width:350px;height:210px;display:flex;align-items:end;gap:18px;padding:35px 32px 12px 38px;position:relative;">
-                        <div style="position:absolute;left:0;top:30px;bottom:18px;width:36px;display:flex;flex-direction:column;justify-content:space-between;z-index:2;">
-                            <?php for ($g = 4; $g >= 0; $g--): 
-                                $val = round($maxRevenue * $g / 4);
-                            ?>
-                                <div style="height:39px;display:flex;align-items:center;">
-                                    <span style="font-size:12px;color:#43afc7;"><?php echo '₱' . number_format($val); ?></span>
+                updateRoomsOccupiedCard();
+                </script>
+               
+                <section class="panel">
+                    <div class="panel-header">
+                        Performance Overview 
+                        <span style="font-weight:400;font-size:13px;color:var(--text-muted);">(Current Week: Monday - Sunday)</span>
+                    </div>
+                    <div class="performance-overview">
+                        <div class="chart-section">
+                            <div class="graph-placeholder" style="height:210px;display:flex;align-items:end;gap:18px;padding:35px 32px 12px 38px;position:relative;">
+                                <div style="position:absolute;left:0;top:30px;bottom:18px;width:36px;display:flex;flex-direction:column;justify-content:space-between;z-index:2;">
+                                    <?php for ($g = 4; $g >= 0; $g--): 
+                                        $val = round($maxRevenue * $g / 4);
+                                    ?>
+                                        <div style="height:39px;display:flex;align-items:center;">
+                                            <span style="font-size:12px;color:var(--text-muted);"><?php echo '₱' . number_format($val); ?></span>
+                                        </div>
+                                    <?php endfor; ?>
                                 </div>
-                            <?php endfor; ?>
-                        </div>
-                        <div style="position:absolute;left:34px;right:20px;top:38px;bottom:18px;pointer-events:none;z-index:1;">
-                            <?php for ($g = 0; $g < 5; $g++): ?>
-                                <div style="position:absolute;left:0;right:0;top:<?php echo ($g*25); ?>%;height:1px;background:rgba(89,226,235,0.07);"></div>
-                            <?php endfor; ?>
-                        </div>
-                        <div style="display:flex;align-items:end;height:170px;width:100%;z-index:3;gap:18px;margin-left:32px;">
-                            <?php foreach ($dailyRevenue as $i => $rev): 
-                                $height = $maxRevenue ? intval($rev / $maxRevenue * 100) : 0;
-                            ?>
-                            <div style="display:flex;flex-direction:column;align-items:center;width:28px;">
-                                <div style="width:100%; height:<?php echo max($height,5); ?>%; background:linear-gradient(120deg,#4dfca1 60%,#47b8fd 110%); border-radius:6px 6px 2px 2px; margin-bottom:3px; transition:height .3s; position:relative;" title="<?php echo 'Revenue: ₱' . number_format($rev); ?>">
-                                    <?php if ($i === 6): ?>
-                                        <span style="position:absolute;bottom:104%;right:-22px;display:inline-block;background:#fff;color:#1f8652;font-size:12px;border-radius:3px;padding:1.5px 6px;font-weight:600;box-shadow:0 1px 4px #0001;">
-                                            ₱<?php echo number_format($rev); ?>
+                                <div style="position:absolute;left:34px;right:20px;top:38px;bottom:18px;pointer-events:none;z-index:1;">
+                                    <?php for ($g = 0; $g < 5; $g++): ?>
+                                        <div style="position:absolute;left:0;right:0;top:<?php echo ($g*25); ?>%;height:1px;background:var(--border-primary);opacity:0.3;"></div>
+                                    <?php endfor; ?>
+                                </div>
+                                <div style="display:flex;align-items:end;height:170px;width:100%;z-index:3;gap:18px;margin-left:32px;">
+                                    <?php foreach ($dailyRevenue as $i => $rev): 
+                                        $height = $maxRevenue ? intval($rev / $maxRevenue * 100) : 0;
+                                    ?>
+                                    <div style="display:flex;flex-direction:column;align-items:center;width:28px;">
+                                        <div style="width:100%; height:<?php echo max($height,5); ?>%; background:linear-gradient(120deg,#3b82f6 60%,#8b5cf6 110%); border-radius:6px 6px 2px 2px; margin-bottom:3px; transition:height .3s; position:relative;" title="<?php echo 'Revenue: ₱' . number_format($rev); ?>">
+                                            <?php if ($i === 6): ?>
+                                                <span style="position:absolute;bottom:104%;right:-22px;display:inline-block;background:var(--bg-card);color:var(--text-primary);font-size:12px;border-radius:3px;padding:1.5px 6px;font-weight:600;box-shadow:var(--shadow-sm);">
+                                                    ₱<?php echo number_format($rev); ?>
+                                                </span>
+                                            <?php endif; ?>                            
+                                        </div>
+                                        <span style="font-size:12px;color:var(--text-secondary);text-align:center;white-space:nowrap;margin-top:2px;">
+                                            <?php echo date('D', strtotime($dates[$i])); ?>
                                         </span>
-                                    <?php endif; ?>                            
+                                    </div>
+                                    <?php endforeach; ?>
                                 </div>
-                                <span style="font-size:12px;color:#1574af;text-align:center;white-space:nowrap;margin-top:2px;">
-                                    <?php echo date('D', strtotime($dates[$i])); ?>
-                                </span>
                             </div>
-                            <?php endforeach; ?>
+                        </div>
+                        <div class="chart-section">
+                            <div class="chart-container">
+                                <canvas id="revenueChart" style="width:100%;height:220px;background:transparent;"></canvas>
+                            </div>
                         </div>
                     </div>
-                    <div style="flex:1;min-width:350px;max-width:460px;padding:12px 8px 0 8px;">
-                        <canvas id="revenueChart" style="width:100%;height:220px;background:transparent;"></canvas>
-                    </div>
-                </div>
-            </section>
-            <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-            <script>
-            (function() {
-                var ctx = document.getElementById('revenueChart').getContext('2d');
-                var labels = <?php echo json_encode(array_map(function($d){return date('D', strtotime($d));}, $dates)); ?>;
-                var data = <?php echo json_encode(array_map('intval', $dailyRevenue)); ?>;
-                // Always light mode
-                var gridColor = "rgba(180,191,203,0.13)";
-                var textColor = "#2266aa";
-                var chart = new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: labels,
-                        datasets: [{
-                            label: 'Daily Revenue',
-                            data: data,
-                            borderColor: '#30eb91',
-                            backgroundColor: 'rgba(58,178,234,0.09)',
-                            fill: true,
-                            pointRadius: 5,
-                            pointBackgroundColor: '#49bafd',
-                            pointBorderWidth: 2,
-                            borderWidth: 3,
-                            tension: 0.38
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {display: false},
-                            tooltip: {
-                                callbacks: {
-                                    label: function(context) {
-                                        return 'Revenue: ₱' + context.parsed.y.toLocaleString();
-                                    }
-                                },
-                                backgroundColor:'#fff',
-                                titleColor:'#0b2738',
-                                bodyColor:'#047',
-                                borderColor:'#46dad6'
-                            }
+                </section>
+                <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+                <script>
+                (function() {
+                    var ctx = document.getElementById('revenueChart').getContext('2d');
+                    var labels = <?php echo json_encode(array_map(function($d){return date('D', strtotime($d));}, $dates)); ?>;
+                    var data = <?php echo json_encode(array_map('intval', $dailyRevenue)); ?>;
+                    
+                    // Get current theme
+                    var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+                    var gridColor = isDark ? "rgba(148, 163, 184, 0.2)" : "rgba(180,191,203,0.13)";
+                    var textColor = isDark ? "#cbd5e1" : "#475569";
+                    var bgColor = isDark ? "rgba(59, 130, 246, 0.1)" : "rgba(58,178,234,0.09)";
+                    
+                    var chart = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: 'Daily Revenue',
+                                data: data,
+                                borderColor: '#3b82f6',
+                                backgroundColor: bgColor,
+                                fill: true,
+                                pointRadius: 5,
+                                pointBackgroundColor: '#3b82f6',
+                                pointBorderWidth: 2,
+                                borderWidth: 3,
+                                tension: 0.38
+                            }]
                         },
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                suggestedMax: <?php echo ceil($maxRevenue/1000)*1000; ?>,
-                                ticks: {
-                                    color: textColor,
-                                    callback: function(val) {return '₱' + val.toLocaleString();}
-                                },
-                                grid: { color: gridColor, drawTicks: false }
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {display: false},
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            return 'Revenue: ₱' + context.parsed.y.toLocaleString();
+                                        }
+                                    },
+                                    backgroundColor: isDark ? '#1e293b' : '#fff',
+                                    titleColor: isDark ? '#f8fafc' : '#0f172a',
+                                    bodyColor: isDark ? '#cbd5e1' : '#475569',
+                                    borderColor: '#3b82f6'
+                                }
                             },
-                            x: {
-                                ticks:{color:textColor},
-                                grid: {display: false}
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    suggestedMax: <?php echo ceil($maxRevenue/1000)*1000; ?>,
+                                    ticks: {
+                                        color: textColor,
+                                        callback: function(val) {return '₱' + val.toLocaleString();}
+                                    },
+                                    grid: { color: gridColor, drawTicks: false }
+                                },
+                                x: {
+                                    ticks:{color:textColor},
+                                    grid: {display: false}
+                                }
                             }
                         }
-                    }
-                });
-            })();
-            </script>
+                    });
+                    
+                    // Update chart when theme changes
+                    window.addEventListener('themeChanged', function(e) {
+                        var isDark = e.detail.theme === 'dark';
+                        chart.options.plugins.tooltip.backgroundColor = isDark ? '#1e293b' : '#fff';
+                        chart.options.plugins.tooltip.titleColor = isDark ? '#f8fafc' : '#0f172a';
+                        chart.options.plugins.tooltip.bodyColor = isDark ? '#cbd5e1' : '#475569';
+                        chart.options.scales.y.ticks.color = isDark ? '#cbd5e1' : '#475569';
+                        chart.options.scales.x.ticks.color = isDark ? '#cbd5e1' : '#475569';
+                        chart.options.scales.y.grid.color = isDark ? "rgba(148, 163, 184, 0.2)" : "rgba(180,191,203,0.13)";
+                        chart.update();
+                    });
+                })();
+                </script>
 
-            <section class="panel">
-                <div class="panel-header">Audit Log</div>
-                <div class="table-wrap">
-                    <table class="audit-table">
-                        <thead>
-                            <tr>
-                                <th>Timestamp</th>
-                                <th>User</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php if (empty($recentAudits)): ?>
+                <section class="panel">
+                    <div class="panel-header">Recent Activity</div>
+                    <div class="table-wrap">
+                        <table class="audit-table">
+                            <thead>
                                 <tr>
-                                    <td colspan="3" style="color:#98cfe7;">No recent activity.</td>
+                                    <th>Timestamp</th>
+                                    <th>User</th>
+                                    <th>Action</th>
                                 </tr>
-                            <?php else: ?>
-                                <?php foreach ($recentAudits as $log): ?>
+                            </thead>
+                            <tbody>
+                                <?php if (empty($recentAudits)): ?>
                                     <tr>
-                                        <td><?php echo htmlspecialchars($log['Timestamp'], ENT_QUOTES, 'UTF-8'); ?></td>
-                                        <td><?php echo htmlspecialchars($log['UserName'], ENT_QUOTES, 'UTF-8'); ?></td>
-                                        <td><?php echo htmlspecialchars($log['ActionText'], ENT_QUOTES, 'UTF-8'); ?></td>
+                                        <td colspan="3" style="color:var(--text-muted);">No recent activity.</td>
                                     </tr>
-                                <?php endforeach; ?>
-                            <?php endif; ?>
-                        </tbody>
-                    </table>
-                </div>
-            </section>
-            <footer class="dash-footer">
-                <span>© 2025 Admin Module</span>
-            </footer>
+                                <?php else: ?>
+                                    <?php foreach ($recentAudits as $log): ?>
+                                        <tr>
+                                            <td><?php echo htmlspecialchars($log['Timestamp'], ENT_QUOTES, 'UTF-8'); ?></td>
+                                            <td><?php echo htmlspecialchars($log['UserName'], ENT_QUOTES, 'UTF-8'); ?></td>
+                                            <td><?php echo htmlspecialchars($log['ActionText'], ENT_QUOTES, 'UTF-8'); ?></td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+                <footer class="dash-footer">
+                    <span>© 2025 Hotel Management System</span>
+                </footer>
             </div>
         </main>
     </div>
 
+    <script src="JS_files/theme.js"></script>
     <script>
     (function() {
         var toggles = document.querySelectorAll('.nav-item.has-children');
